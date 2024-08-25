@@ -4,19 +4,42 @@ import { MinusIcon, PlusIcon } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { cn } from "../utils/cn";
 
-function changeUnit(currentUnit: UnitType) {
-  if (currentUnit === "volume") {
-    return "weight";
+function calculate(price, amount) {
+  if (!price || !amount) {
+    return 0;
   }
 
-  return "volume";
+  return price / amount;
 }
+
+type IRow = {
+  price?: string;
+  amount?: string;
+};
 
 export function PriceCompare() {
   const [unit, setUnit] = useState<UnitType>("weight");
-  const [rowAmount, setRowAmount] = useState(2);
+  const [rows, setRows] = useState<IRow[]>([
+    { amount: undefined, price: undefined },
+    { amount: undefined, price: undefined },
+  ]);
 
   const [parent] = useAutoAnimate();
+
+  let lowestPrice = Number.MAX_VALUE;
+
+  rows.forEach((row) => {
+    const price = Number(row.price || 0);
+    const amount = Number(row.amount || 0);
+
+    const proportionalPrice = calculate(price, amount);
+
+    if (proportionalPrice < lowestPrice && proportionalPrice !== 0) {
+      lowestPrice = proportionalPrice;
+    }
+  });
+
+  console.log(`lowestPrice`, lowestPrice);
 
   return (
     <div>
@@ -43,17 +66,51 @@ export function PriceCompare() {
       </div>
 
       <div className="flex flex-col gap-2" ref={parent}>
-        {Array(rowAmount)
-          .fill("")
-          .map((_, index) => {
-            return <PriceRow unitType={unit} key={index} />;
-          })}
+        {rows.map((item, index) => {
+          const calculatedPrice = calculate(item.price, item.amount);
+
+          return (
+            <PriceRow
+              price={item.price}
+              setPrice={(price: string) => {
+                setRows((v) => {
+                  const copy = [...v];
+                  const row = copy[index];
+
+                  row.price = price;
+                  copy[index] = row;
+
+                  return copy;
+                });
+              }}
+              amount={item.amount}
+              setAmount={(amount: string) => {
+                setRows((v) => {
+                  const copy = [...v];
+                  const row = copy[index];
+
+                  row.amount = amount;
+                  copy[index] = row;
+
+                  return copy;
+                });
+              }}
+              key={index}
+              unitType={unit}
+              isCheapest={calculatedPrice === lowestPrice}
+            />
+          );
+        })}
       </div>
 
       <div className="mt-6 flex gap-4 border-t pt-6">
         <button
           className="flex items-center gap-2 rounded-full bg-sky-100 py-2 pl-2 pr-3 text-sm text-sky-800 transition active:bg-sky-200"
-          onClick={() => setRowAmount((v) => v + 1)}
+          onClick={() =>
+            setRows((v) => {
+              return [...v, { amount: undefined, price: undefined }];
+            })
+          }
         >
           <PlusIcon />
           <div>Adicionar linha</div>
@@ -61,11 +118,11 @@ export function PriceCompare() {
 
         <button
           className="flex items-center gap-2 rounded-full bg-orange-100 py-2 pl-2 pr-3 text-sm text-orange-800 transition active:bg-orange-200 disabled:bg-neutral-100 disabled:text-neutral-800 disabled:opacity-70"
-          disabled={rowAmount <= 1}
+          disabled={rows.length <= 1}
           onClick={() =>
-            setRowAmount((v) => {
-              if (v > 1) {
-                return v - 1;
+            setRows((v) => {
+              if (v.length >= 1) {
+                return v.slice(0, v.length - 1);
               }
 
               return v;

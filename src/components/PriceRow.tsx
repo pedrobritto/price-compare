@@ -12,7 +12,12 @@ function calculate(price, amount) {
 export type UnitType = "weight" | "volume";
 
 type PriceRowProps = {
+  price: string;
+  setPrice: (value: string) => void;
+  amount: string;
+  setAmount: (value: string) => void;
   unitType: UnitType;
+  isCheapest?: boolean;
 };
 
 const unitTypeMap = {
@@ -20,16 +25,20 @@ const unitTypeMap = {
   volume: "L",
 };
 
-export function PriceRow({ unitType }: PriceRowProps) {
-  const [price, setPrice] = useState<string>(undefined);
-  const [amount, setAmount] = useState<string>(undefined);
-
+export function PriceRow({
+  price,
+  setPrice,
+  amount,
+  setAmount,
+  unitType,
+  isCheapest,
+}: PriceRowProps) {
   const result = calculate(price, amount).toFixed(2);
 
   const selectedUnit = unitTypeMap[unitType];
 
   return (
-    <div className="grid grid-cols-[1fr_1fr_1fr] items-center gap-2">
+    <div className="grid grid-cols-[100px_100px_1fr] items-center gap-2">
       <Input value={amount} update={setAmount} symbol={selectedUnit} />
 
       <Input
@@ -39,7 +48,12 @@ export function PriceRow({ unitType }: PriceRowProps) {
         symbolPosition="before"
       />
 
-      <div className="flex h-10 flex-none items-center justify-center rounded-lg bg-neutral-50 px-2 text-right">
+      <div
+        className={cn(
+          "flex h-10 flex-none items-center justify-end rounded-lg px-2 text-right",
+          isCheapest && "bg-emerald-100",
+        )}
+      >
         <div>
           R$ {result}/{selectedUnit}
         </div>
