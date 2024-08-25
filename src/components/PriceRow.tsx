@@ -1,4 +1,4 @@
-import React, { useState, type Dispatch, type SetStateAction } from "react";
+import React, { type Dispatch, type SetStateAction } from "react";
 import { cn } from "../utils/cn";
 import { CoinsIcon } from "lucide-react";
 

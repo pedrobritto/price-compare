@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PriceRow, type UnitType } from "./PriceRow";
 import {
   CircleMinusIcon,
   CirclePlusIcon,
-  MinusIcon,
-  PlusIcon,
   RotateCcw,
   ShuffleIcon,
 } from "lucide-react";
