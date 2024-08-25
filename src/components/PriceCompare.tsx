@@ -1,10 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { PriceRow, type UnitType } from "./PriceRow";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { cn } from "../utils/cn";
 
-function getProportionalPrice(price: string, amount: string) {
+function getProportionalPrice(
+  price: string,
+  amount: string,
+  isSmallUnit: boolean,
+) {
   const numberPrice = Number(price?.replace(",", ".") || 0);
   const numberAmount = Number(amount?.replace(",", ".") || 0);
 
@@ -12,58 +16,91 @@ function getProportionalPrice(price: string, amount: string) {
     return 0;
   }
 
-  return Number((numberPrice / numberAmount).toFixed(2));
+  const proportionalPrice = numberPrice / numberAmount;
+
+  if (isSmallUnit) {
+    return Number((proportionalPrice * 1000).toFixed(2));
+  }
+
+  return Number(proportionalPrice.toFixed(2));
 }
 
+/** The data of a single row. */
 type IRow = {
   price: string;
   amount: string;
 };
 
-export function PriceCompare() {
-  const [unit, setUnit] = useState<UnitType>("weight");
-  const [rows, setRows] = useState<IRow[]>([
-    { amount: "", price: "" },
-    { amount: "", price: "" },
-  ]);
-
-  const [parent] = useAutoAnimate();
-
+/**
+ * Calculates and returns the lowest proportional price inside the list.
+ *
+ * @param rows The item rows
+ * @param isSmallUnit Whether the smallUnit is toggled.
+ * @returns The lowest price in the rows
+ */
+function getLowestProportionalPrice(rows: IRow[], isSmallUnit: boolean) {
   let lowestPrice = Number.MAX_VALUE;
 
   rows.forEach((item) => {
-    const proportionalPrice = getProportionalPrice(item.price, item.amount);
+    const proportionalPrice = getProportionalPrice(
+      item.price,
+      item.amount,
+      isSmallUnit,
+    );
 
     if (proportionalPrice < lowestPrice && proportionalPrice !== 0) {
       lowestPrice = proportionalPrice;
     }
   });
 
+  return lowestPrice;
+}
+
+const emptyRow = { amount: "", price: "" };
+
+export function PriceCompareApp() {
+  const [unit, setUnit] = useState<UnitType>("weight");
+  const [isSmallUnit, setIsSmallUnit] = useState(false);
+  const [rows, setRows] = useState<IRow[]>([{ ...emptyRow }, { ...emptyRow }]);
+
+  const [parent] = useAutoAnimate();
+
+  const lowestPrice = getLowestProportionalPrice(rows, isSmallUnit);
+
+  /** Get the label for the toggle small unit button. */
+  function getSmallUnitButtonToggleLabel() {
+    if (unit === "volume") {
+      return isSmallUnit ? "Litros (L)" : "Mililitros (ml)";
+    }
+
+    return isSmallUnit ? "Quilos (Kg)" : "Gramas (g)";
+  }
+
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between border-b border-b-neutral-100 pb-6">
-        <div className="inline-flex items-center rounded-full bg-neutral-50">
-          <button
-            className={cn(
-              "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
-              unit === "weight" && "bg-sky-100 text-sky-800",
-            )}
-            onClick={() => setUnit("weight")}
-          >
-            Peso
-          </button>
-          <button
-            className={cn(
-              "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
-              unit === "volume" && "bg-sky-100 text-sky-800",
-            )}
-            onClick={() => setUnit("volume")}
-          >
-            Volume
-          </button>
-        </div>
+      <div className="border-b border-b-neutral-100 pb-6 mb-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="inline-flex items-center rounded-full bg-neutral-50">
+            <button
+              className={cn(
+                "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
+                unit === "weight" && "bg-sky-100 text-sky-800",
+              )}
+              onClick={() => setUnit("weight")}
+            >
+              Peso
+            </button>
+            <button
+              className={cn(
+                "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
+                unit === "volume" && "bg-sky-100 text-sky-800",
+              )}
+              onClick={() => setUnit("volume")}
+            >
+              Volume
+            </button>
+          </div>
 
-        <div>
           <button
             className="rounded-full bg-neutral-100 px-3 py-1 text-sm"
             onClick={() => {
@@ -79,7 +116,18 @@ export function PriceCompare() {
               });
             }}
           >
-            Limpar tudo
+            Limpar valores
+          </button>
+        </div>
+
+        <div>
+          <button
+            className="px-3 py-1 bg-neutral-100 rounded-full text-sm"
+            onClick={() => {
+              setIsSmallUnit((v) => !v);
+            }}
+          >
+            Usar {getSmallUnitButtonToggleLabel()}
           </button>
         </div>
       </div>
@@ -89,6 +137,7 @@ export function PriceCompare() {
           const proportionalPrice = getProportionalPrice(
             item.price,
             item.amount,
+            isSmallUnit,
           );
 
           return (
@@ -120,6 +169,7 @@ export function PriceCompare() {
               }}
               result={proportionalPrice}
               unitType={unit}
+              isSmallUnit={isSmallUnit}
               isCheapest={proportionalPrice === lowestPrice}
             />
           );
@@ -131,7 +181,7 @@ export function PriceCompare() {
           className="flex items-center gap-2 rounded-full bg-sky-100 py-2 pl-2 pr-3 text-sm text-sky-800 transition active:bg-sky-200"
           onClick={() =>
             setRows((v) => {
-              return [...v, { amount: "", price: "" }];
+              return [...v, { ...emptyRow }];
             })
           }
         >

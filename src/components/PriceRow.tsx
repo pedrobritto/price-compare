@@ -1,33 +1,53 @@
 import React, { useState, type Dispatch, type SetStateAction } from "react";
 import { cn } from "../utils/cn";
+import { CoinsIcon } from "lucide-react";
 
+const unitTypeMap = {
+  weight: {
+    default: "Kg",
+    small: "g",
+  },
+  volume: {
+    default: "L",
+    small: "ml",
+  },
+};
+
+/** The type for unit types. */
 export type UnitType = "weight" | "volume";
 
 type PriceRowProps = {
+  /** The price. */
   price: string;
+  /** The function to update the price. */
   setPrice: (value: string) => void;
+  /** The amount. */
   amount: string;
+  /** The function to update the amount. */
   setAmount: (value: string) => void;
+  /** The proportional price. */
   result: number;
+  /** The unit type. */
   unitType: UnitType;
+  /** Whether the small unit mode is toggled. */
+  isSmallUnit: boolean;
+  /** Whether this is the row with the cheapest proportional price. */
   isCheapest?: boolean;
 };
 
-const unitTypeMap = {
-  weight: "Kg",
-  volume: "L",
-};
-
+/** The component for a single price row. */
 export function PriceRow({
   price,
   setPrice,
   amount,
   setAmount,
   unitType,
+  isSmallUnit,
   result,
   isCheapest,
 }: PriceRowProps) {
-  const selectedUnit = unitTypeMap[unitType];
+  const selectedUnit = unitTypeMap[unitType][isSmallUnit ? "small" : "default"];
+  const unitTypeSymbol = unitTypeMap[unitType].default;
 
   return (
     <div className="grid grid-cols-[100px_100px_1fr] items-center gap-2">
@@ -42,25 +62,34 @@ export function PriceRow({
 
       <div
         className={cn(
-          "flex h-10 flex-none items-center justify-end rounded-lg px-2 text-right transition",
-          isCheapest && "bg-emerald-100",
+          "flex h-10 gap-1 flex-none items-center rounded-lg px-2 text-right transition justify-between",
+          isCheapest && "bg-emerald-100 text-emerald-800",
         )}
       >
+        <div>{isCheapest && <CoinsIcon size={20} strokeWidth={1.5} />}</div>
         <div>
-          R$ {result}/{selectedUnit}
+          R$ {result}/{unitTypeSymbol}
         </div>
       </div>
     </div>
   );
 }
 
-type IInput = {
+/** The Input component props */
+type IInputProps = {
   onChange: Dispatch<SetStateAction<string>>;
   value: string;
   symbol: string;
   symbolPosition?: "before" | "after";
 };
-function Input({ onChange, value, symbol, symbolPosition = "after" }: IInput) {
+
+/** The input component. */
+function Input({
+  onChange,
+  value,
+  symbol,
+  symbolPosition = "after",
+}: IInputProps) {
   const positionClasses = cn(
     symbolPosition === "after" && "rounded-r-none border-r-0",
     symbolPosition === "before" && "rounded-l-none border-l-0",
@@ -94,6 +123,11 @@ type IInputSymbol = {
   children: React.ReactNode;
 };
 
+/** The symbol box to be used with the Input component.
+ *
+ * @param position The position of the input symbol in reference to the input.
+ * @param children The contents iof the InputSymbol
+ */
 function InputSymbol({ position, children }: IInputSymbol) {
   const positionClasses = cn(
     position === "after" && "rounded-l-none",
