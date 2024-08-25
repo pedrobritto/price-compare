@@ -39,8 +39,6 @@ export function PriceCompare() {
     }
   });
 
-  console.log(`lowestPrice`, lowestPrice);
-
   return (
     <div>
       <div className="mb-6 inline-flex items-center rounded-full bg-neutral-50">
