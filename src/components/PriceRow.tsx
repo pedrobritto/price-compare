@@ -62,7 +62,7 @@ export function PriceRow({
 
       <div
         className={cn(
-          "flex h-10 gap-1 flex-none items-center rounded-lg px-2 text-right transition justify-between",
+          "flex h-10 flex-none items-center justify-between gap-1 rounded-lg px-2 text-right transition",
           isCheapest && "bg-emerald-100 text-emerald-800",
         )}
       >
@@ -104,7 +104,7 @@ function Input({
         type="text"
         value={value}
         className={cn(
-          "h-10 w-full rounded-lg border px-2 z-10",
+          "z-10 h-10 w-full rounded-lg border px-2 dark:border-neutral-500 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-400",
           positionClasses,
         )}
         onChange={(e) => onChange(e.target.value)}
@@ -137,7 +137,7 @@ function InputSymbol({ position, children }: IInputSymbol) {
   return (
     <div
       className={cn(
-        "flex h-10 w-8 flex-none items-center justify-center rounded-lg border bg-neutral-100 px-1 text-sm",
+        "flex h-10 w-8 flex-none items-center justify-center rounded-lg border bg-neutral-100 px-1 text-sm dark:border-neutral-500 dark:bg-neutral-800 dark:text-neutral-300",
         positionClasses,
       )}
     >

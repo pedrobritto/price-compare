@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { PriceRow, type UnitType } from "./PriceRow";
-import { MinusIcon, PlusIcon } from "lucide-react";
+import {
+  CircleMinusIcon,
+  CirclePlusIcon,
+  MinusIcon,
+  PlusIcon,
+  RotateCcw,
+  ShuffleIcon,
+} from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { cn } from "../utils/cn";
 
@@ -78,13 +85,14 @@ export function PriceCompareApp() {
 
   return (
     <div>
-      <div className="border-b border-b-neutral-100 pb-6 mb-6">
+      <div className="mb-6 border-b border-b-neutral-100 pb-6 dark:border-b-neutral-700">
         <div className="mb-4 flex items-center justify-between">
-          <div className="inline-flex items-center rounded-full bg-neutral-50">
+          <div className="inline-flex items-center rounded-full bg-neutral-50 dark:bg-neutral-800 ">
             <button
               className={cn(
-                "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
-                unit === "weight" && "bg-sky-100 text-sky-800",
+                "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition dark:text-neutral-200",
+                unit === "weight" &&
+                  "bg-sky-100 text-sky-800 dark:bg-sky-800 dark:text-sky-100",
               )}
               onClick={() => setUnit("weight")}
             >
@@ -92,8 +100,9 @@ export function PriceCompareApp() {
             </button>
             <button
               className={cn(
-                "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
-                unit === "volume" && "bg-sky-100 text-sky-800",
+                "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition dark:text-neutral-200",
+                unit === "volume" &&
+                  "bg-sky-100 text-sky-800 dark:bg-sky-800 dark:text-sky-100",
               )}
               onClick={() => setUnit("volume")}
             >
@@ -102,7 +111,7 @@ export function PriceCompareApp() {
           </div>
 
           <button
-            className="rounded-full bg-neutral-100 px-3 py-1 text-sm"
+            className="rounded-full bg-neutral-100 px-3 py-1 text-sm dark:bg-neutral-700 flex gap-2 items-center"
             onClick={() => {
               setRows((v) => {
                 const copy = [...v];
@@ -116,18 +125,20 @@ export function PriceCompareApp() {
               });
             }}
           >
+            <RotateCcw size={16} />
             Limpar valores
           </button>
         </div>
 
         <div>
           <button
-            className="px-3 py-1 bg-neutral-100 rounded-full text-sm"
+            className="rounded-full bg-neutral-100 px-3 py-1 text-sm dark:bg-neutral-700 flex gap-2 items-center"
             onClick={() => {
               setIsSmallUnit((v) => !v);
             }}
           >
-            Usar {getSmallUnitButtonToggleLabel()}
+            <ShuffleIcon size={16} className="-rotate-90" />
+            Mudar para {getSmallUnitButtonToggleLabel()}
           </button>
         </div>
       </div>
@@ -176,21 +187,21 @@ export function PriceCompareApp() {
         })}
       </div>
 
-      <div className="mt-6 flex gap-4 border-t border-t-neutral-100 pt-6">
+      <div className="mt-6 flex gap-4 border-t border-t-neutral-100 pt-6 dark:border-t-neutral-700">
         <button
-          className="flex items-center gap-2 rounded-full bg-sky-100 py-2 pl-2 pr-3 text-sm text-sky-800 transition active:bg-sky-200"
+          className="flex items-center gap-2 rounded-full bg-sky-100 py-2 pl-2 pr-3 text-sm text-sky-800 transition active:bg-sky-200 dark:bg-sky-800 dark:text-sky-100"
           onClick={() =>
             setRows((v) => {
               return [...v, { ...emptyRow }];
             })
           }
         >
-          <PlusIcon />
+          <CirclePlusIcon size={20} />
           <div>Adicionar linha</div>
         </button>
 
         <button
-          className="flex items-center gap-2 rounded-full bg-orange-100 py-2 pl-2 pr-3 text-sm text-orange-800 transition active:bg-orange-200 disabled:bg-neutral-100 disabled:text-neutral-800 disabled:opacity-70"
+          className="flex items-center gap-2 rounded-full bg-orange-100 py-2 pl-2 pr-3 text-sm text-orange-800 transition active:bg-orange-200 disabled:bg-neutral-100 disabled:text-neutral-800 disabled:opacity-70 dark:bg-orange-800 dark:text-orange-100"
           disabled={rows.length <= 1}
           onClick={() =>
             setRows((v) => {
@@ -202,7 +213,7 @@ export function PriceCompareApp() {
             })
           }
         >
-          <MinusIcon />
+          <CircleMinusIcon size={20} />
           <div>Remover linha</div>
         </button>
       </div>
