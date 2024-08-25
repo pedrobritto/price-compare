@@ -4,35 +4,35 @@ import { MinusIcon, PlusIcon } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { cn } from "../utils/cn";
 
-function calculate(price, amount) {
-  if (!price || !amount) {
+function getProportionalPrice(price: string, amount: string) {
+  const numberPrice = Number(price?.replace(",", ".") || 0);
+  const numberAmount = Number(amount?.replace(",", ".") || 0);
+
+  if (!numberPrice || !numberAmount) {
     return 0;
   }
 
-  return price / amount;
+  return Number((numberPrice / numberAmount).toFixed(2));
 }
 
 type IRow = {
-  price?: string;
-  amount?: string;
+  price: string;
+  amount: string;
 };
 
 export function PriceCompare() {
   const [unit, setUnit] = useState<UnitType>("weight");
   const [rows, setRows] = useState<IRow[]>([
-    { amount: undefined, price: undefined },
-    { amount: undefined, price: undefined },
+    { amount: "", price: "" },
+    { amount: "", price: "" },
   ]);
 
   const [parent] = useAutoAnimate();
 
   let lowestPrice = Number.MAX_VALUE;
 
-  rows.forEach((row) => {
-    const price = Number(row.price || 0);
-    const amount = Number(row.amount || 0);
-
-    const proportionalPrice = calculate(price, amount);
+  rows.forEach((item) => {
+    const proportionalPrice = getProportionalPrice(item.price, item.amount);
 
     if (proportionalPrice < lowestPrice && proportionalPrice !== 0) {
       lowestPrice = proportionalPrice;
@@ -41,34 +41,59 @@ export function PriceCompare() {
 
   return (
     <div>
-      <div className="mb-6 inline-flex items-center rounded-full bg-neutral-50">
-        <button
-          className={cn(
-            "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
-            unit === "weight" && "bg-sky-100 text-sky-800",
-          )}
-          onClick={() => setUnit("weight")}
-        >
-          Peso
-        </button>
+      <div className="mb-6 flex items-center justify-between border-b border-b-neutral-100 pb-6">
+        <div className="inline-flex items-center rounded-full bg-neutral-50">
+          <button
+            className={cn(
+              "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
+              unit === "weight" && "bg-sky-100 text-sky-800",
+            )}
+            onClick={() => setUnit("weight")}
+          >
+            Peso
+          </button>
+          <button
+            className={cn(
+              "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
+              unit === "volume" && "bg-sky-100 text-sky-800",
+            )}
+            onClick={() => setUnit("volume")}
+          >
+            Volume
+          </button>
+        </div>
 
-        <button
-          className={cn(
-            "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
-            unit === "volume" && "bg-sky-100 text-sky-800",
-          )}
-          onClick={() => setUnit("volume")}
-        >
-          Volume
-        </button>
+        <div>
+          <button
+            className="rounded-full bg-neutral-100 px-3 py-1 text-sm"
+            onClick={() => {
+              setRows((v) => {
+                const copy = [...v];
+
+                copy.forEach((item) => {
+                  item.amount = "";
+                  item.price = "";
+                });
+
+                return copy;
+              });
+            }}
+          >
+            Limpar tudo
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2" ref={parent}>
         {rows.map((item, index) => {
-          const calculatedPrice = calculate(item.price, item.amount);
+          const proportionalPrice = getProportionalPrice(
+            item.price,
+            item.amount,
+          );
 
           return (
             <PriceRow
+              key={index}
               price={item.price}
               setPrice={(price: string) => {
                 setRows((v) => {
@@ -93,20 +118,20 @@ export function PriceCompare() {
                   return copy;
                 });
               }}
-              key={index}
+              result={proportionalPrice}
               unitType={unit}
-              isCheapest={calculatedPrice === lowestPrice}
+              isCheapest={proportionalPrice === lowestPrice}
             />
           );
         })}
       </div>
 
-      <div className="mt-6 flex gap-4 border-t pt-6">
+      <div className="mt-6 flex gap-4 border-t border-t-neutral-100 pt-6">
         <button
           className="flex items-center gap-2 rounded-full bg-sky-100 py-2 pl-2 pr-3 text-sm text-sky-800 transition active:bg-sky-200"
           onClick={() =>
             setRows((v) => {
-              return [...v, { amount: undefined, price: undefined }];
+              return [...v, { amount: "", price: "" }];
             })
           }
         >
