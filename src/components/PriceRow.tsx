@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, type Dispatch, type SetStateAction } from "react";
 import { cn } from "../utils/cn";
 
 function calculate(price, amount) {
@@ -21,16 +21,16 @@ const unitTypeMap = {
 };
 
 export function PriceRow({ unitType }: PriceRowProps) {
-  const [price, setPrice] = useState(undefined);
-  const [amount, setAmount] = useState(undefined);
+  const [price, setPrice] = useState<string>(undefined);
+  const [amount, setAmount] = useState<string>(undefined);
 
   const result = calculate(price, amount).toFixed(2);
 
-  const unit = unitTypeMap[unitType];
+  const selectedUnit = unitTypeMap[unitType];
 
   return (
     <div className="grid grid-cols-[1fr_1fr_1fr] items-center gap-2">
-      <Input value={amount} update={setAmount} symbol={unit} />
+      <Input value={amount} update={setAmount} symbol={selectedUnit} />
 
       <Input
         value={price}
@@ -39,16 +39,22 @@ export function PriceRow({ unitType }: PriceRowProps) {
         symbolPosition="before"
       />
 
-      <div className="flex-none">
+      <div className="flex h-10 flex-none items-center justify-center rounded-lg bg-neutral-50 px-2 text-right">
         <div>
-          R$ {result}/{unit}
+          R$ {result}/{selectedUnit}
         </div>
       </div>
     </div>
   );
 }
 
-function Input({ update, value, symbol, symbolPosition = "after" }) {
+type IInput = {
+  update: Dispatch<SetStateAction<string>>;
+  value: string;
+  symbol: string;
+  symbolPosition?: "before" | "after";
+};
+function Input({ update, value, symbol, symbolPosition = "after" }: IInput) {
   const positionClasses = cn(
     symbolPosition === "after" && "rounded-r-none border-r-0",
     symbolPosition === "before" && "rounded-l-none border-l-0",
@@ -65,6 +71,7 @@ function Input({ update, value, symbol, symbolPosition = "after" }) {
         className={cn("h-10 w-full rounded-lg border px-2", positionClasses)}
         onChange={(e) => update(e.target.value)}
         placeholder="0.00"
+        inputMode="decimal"
       />
       {symbolPosition === "after" && (
         <InputSymbol position={symbolPosition}>{symbol}</InputSymbol>
@@ -73,7 +80,12 @@ function Input({ update, value, symbol, symbolPosition = "after" }) {
   );
 }
 
-function InputSymbol({ position, children }) {
+type IInputSymbol = {
+  position: "before" | "after";
+  children: React.ReactNode;
+};
+
+function InputSymbol({ position, children }: IInputSymbol) {
   const positionClasses = cn(
     position === "after" && "rounded-l-none",
     position === "before" && "rounded-r-none",

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { PriceRow, type UnitType } from "./PriceRow";
-import { PlusIcon } from "lucide-react";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { cn } from "../utils/cn";
 
 function changeUnit(currentUnit: UnitType) {
   if (currentUnit === "volume") {
@@ -19,21 +20,29 @@ export function PriceCompare() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-6">
-        <h2 className="text-lg font-bold text-neutral-700">
-          {unit === "volume" ? "Volume" : "Peso"}
-        </h2>
+      <div className="mb-6 inline-flex items-center rounded-full bg-neutral-50">
         <button
-          className="rounded-lg border border-sky-600 bg-sky-100 px-2.5 py-1 text-sm text-sky-800 active:bg-sky-200"
-          onClick={() => {
-            setUnit(changeUnit(unit));
-          }}
+          className={cn(
+            "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
+            unit === "weight" && "bg-sky-100 text-sky-800",
+          )}
+          onClick={() => setUnit("weight")}
         >
-          Mudar para {changeUnit(unit) === "weight" ? "Peso" : "Volume"}
+          Peso
+        </button>
+
+        <button
+          className={cn(
+            "rounded-full px-4 py-2 text-lg font-bold text-neutral-700 transition",
+            unit === "volume" && "bg-sky-100 text-sky-800",
+          )}
+          onClick={() => setUnit("volume")}
+        >
+          Volume
         </button>
       </div>
 
-      <div className="flex flex-col gap-4" ref={parent}>
+      <div className="flex flex-col gap-2" ref={parent}>
         {Array(rowAmount)
           .fill("")
           .map((_, index) => {
@@ -41,13 +50,30 @@ export function PriceCompare() {
           })}
       </div>
 
-      <div className="mt-4">
+      <div className="mt-6 flex gap-4 border-t pt-6">
         <button
-          className="flex items-center gap-2 rounded-lg border border-sky-600 bg-sky-100 py-2 pl-2 pr-3 text-sm text-sky-800 active:bg-sky-200"
+          className="flex items-center gap-2 rounded-full bg-sky-100 py-2 pl-2 pr-3 text-sm text-sky-800 transition active:bg-sky-200"
           onClick={() => setRowAmount((v) => v + 1)}
         >
           <PlusIcon />
-          <div>Adicionar outra linha</div>
+          <div>Adicionar linha</div>
+        </button>
+
+        <button
+          className="flex items-center gap-2 rounded-full bg-orange-100 py-2 pl-2 pr-3 text-sm text-orange-800 transition active:bg-orange-200 disabled:bg-neutral-100 disabled:text-neutral-800 disabled:opacity-70"
+          disabled={rowAmount <= 1}
+          onClick={() =>
+            setRowAmount((v) => {
+              if (v > 1) {
+                return v - 1;
+              }
+
+              return v;
+            })
+          }
+        >
+          <MinusIcon />
+          <div>Remover linha</div>
         </button>
       </div>
     </div>
